@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class EchoTCPClient {
+public class EchoTCPClient9 {
     public static void main(String[] args) {
         try (Socket clientSideSocket = new Socket("localhost", 3400);
              PrintWriter toNetwork = new PrintWriter(clientSideSocket.getOutputStream(), true);

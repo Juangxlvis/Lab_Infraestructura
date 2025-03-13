@@ -5,7 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
-public class EchoTCPServer {
+public class EchoTCPServer9 {
     public static void main(String[] args) {
         final int PORT = 3400;
         try (ServerSocket listener = new ServerSocket(PORT)) {
@@ -16,26 +16,28 @@ public class EchoTCPServer {
                 Socket serverSideSocket = listener.accept();
                 System.out.println("Cliente conectado desde " + serverSideSocket.getInetAddress());
 
+                serverSideSocket.setSoTimeout(10000); // 10 segundos de espera
+
                 try (BufferedReader fromNetwork = new BufferedReader(new InputStreamReader(serverSideSocket.getInputStream()));
                      PrintWriter toNetwork = new PrintWriter(serverSideSocket.getOutputStream(), true)) {
 
-                    System.out.println("[Servidor] Recibiendo archivo línea por línea...");
+                    System.out.println("[Server] Esperando mensajes...");
+                    StringBuilder receivedMessage = new StringBuilder();
+                    String message;
 
-                    String line;
-                    while ((line = fromNetwork.readLine()) != null) {
-                        if (line.equalsIgnoreCase("FIN")) { // Indica que el cliente terminó de enviar
-                            System.out.println("[Servidor] Fin de transmisión detectado.");
+                    while ((message = fromNetwork.readLine()) != null) {
+                        if (message.equalsIgnoreCase("FIN")) { // Cliente indica el final del mensaje
                             break;
                         }
-
-                        System.out.println("[Servidor] Recibido: " + line);
-                        toNetwork.println("Recibido: " + line); // Enviar confirmación al cliente
+                        receivedMessage.append(message).append("\n");
                     }
+
+                    System.out.println("[Server] Recibido:\n" + receivedMessage);
+                    toNetwork.println("Mensaje recibido correctamente"); // Respuesta al cliente
 
                 } catch (SocketTimeoutException e) {
                     System.out.println("Tiempo de espera agotado. Cerrando conexión...");
                 }
-                System.out.println("[Servidor] Cliente desconectado.");
                 serverSideSocket.close();
             }
         } catch (IOException e) {
